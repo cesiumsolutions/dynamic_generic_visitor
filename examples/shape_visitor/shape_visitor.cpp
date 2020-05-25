@@ -1,6 +1,7 @@
 #include <shapes/AreaVisitor.hpp>
 #include <shapes/CircumferenceVisitor.hpp>
 
+#include <visitor/StaticVisitor.hpp>
 #include <visitor/Visitable.hpp>
 
 #include <functional>
@@ -11,13 +12,14 @@ struct NonShape
 {
 };
 
+using ShapeVisitor         = StaticVisitor<Rectangle, Circle>;
 using VisitableShapePtr    = VisitableUPtr<ShapeVisitor>;
 using VisitableShapePtrVec = std::vector<VisitableShapePtr>;
 
 int
 main( int, char ** )
 {
-  std::cout << "Running Generic Visitable Example\n\n";
+  std::cout << "Running Generic StaticVisitor Example\n\n";
 
   Rectangle rectangle { 2.0f, 3.0f };
   Circle    circle { 2.0f };

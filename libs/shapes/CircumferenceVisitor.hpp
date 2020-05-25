@@ -2,9 +2,10 @@
 #define CircumferenceVisitor_hpp
 
 #include <shapes/Circumference.hpp>
-#include <shapes/ShapeVisitor.hpp>
 
-class CircumferenceVisitor : public ShapeVisitor
+#include <visitor/StaticVisitor.hpp>
+
+class CircumferenceVisitor : public StaticVisitor<Rectangle, Circle>
 {
 public:
   virtual ~CircumferenceVisitor() = default;

@@ -2,9 +2,10 @@
 #define AreaVisitor_hpp
 
 #include <shapes/Area.hpp>
-#include <shapes/ShapeVisitor.hpp>
 
-class AreaVisitor : public ShapeVisitor
+#include <visitor/StaticVisitor.hpp>
+
+class AreaVisitor : public StaticVisitor<Rectangle, Circle>
 {
 public:
   virtual ~AreaVisitor() = default;

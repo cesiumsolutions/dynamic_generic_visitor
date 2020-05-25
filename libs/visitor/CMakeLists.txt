@@ -1,6 +1,7 @@
 set( TARGET visitor )
 
 set( HEADER_FILES
+    StaticVisitor.hpp
     Visitable.hpp
     Visitable.tpp
 )
