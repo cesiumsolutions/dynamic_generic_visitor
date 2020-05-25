@@ -12,14 +12,14 @@ struct NonShape
 {
 };
 
-using ShapeVisitor         = StaticVisitor<Rectangle, Circle>;
+using ShapeVisitor         = StaticVisitor<float, Rectangle, Circle>;
 using VisitableShapePtr    = VisitableUPtr<ShapeVisitor>;
 using VisitableShapePtrVec = std::vector<VisitableShapePtr>;
 
 int
 main( int, char ** )
 {
-  std::cout << "Running Generic StaticVisitor Example\n\n";
+  std::cout << "Running Generic StaticVisitor with Return Value Example\n\n";
 
   Rectangle rectangle { 2.0f, 3.0f };
   Circle    circle { 2.0f };
@@ -39,13 +39,15 @@ main( int, char ** )
 
   // Visit the Shapes with the Area Visitor
   AreaVisitor areaVisitor;
+  float       totalArea = 0.0f;
   for ( auto const & shape : shapes ) {
-    std::cout << "  - Visiting shape[" << shape->typeInfo().name()
-              << "]\n";
-    shape->accept( areaVisitor );
+    float area = shape->accept( areaVisitor );
+    std::cout << "  - Area for shape[" << shape->typeInfo().name()
+              << "]: " << area << '\n';
+    totalArea += area;
   }
   float expectedArea = area( rectangle ) + area( circle );
-  std::cout << "  Visited Area: " << areaVisitor.totalArea << '\n'
+  std::cout << "  Visited Area: " << totalArea << '\n'
             << "  Expected Area: " << expectedArea << '\n';
 
   // ==========================================================================
@@ -53,14 +55,15 @@ main( int, char ** )
 
   // Visit the Shapes with the Circumference Visitor
   CircumferenceVisitor circumferenceVisitor;
+  float                totalCircumference = 0.0f;
   for ( auto const & shape : shapes ) {
-    std::cout << "  - Visiting shape[" << shape->typeInfo().name()
-              << "]\n";
-    shape->accept( circumferenceVisitor );
+    float circumference = shape->accept( circumferenceVisitor );
+    std::cout << "  - Circumference for shape[" << shape->typeInfo().name()
+              << "]: " << circumference << '\n';
+    totalCircumference += circumference;
   }
   float expectedCircumference =
       circumference( rectangle ) + circumference( circle );
-  std::cout << "  Visited Circumference: "
-            << circumferenceVisitor.totalCircumference << '\n'
+  std::cout << "  Visited Circumference: " << totalCircumference << '\n'
             << "  Expected Circumference: " << expectedCircumference << '\n';
 }

@@ -8,45 +8,59 @@
 // VisitableBase
 // ----------------------------------------------------------------------------
 
-template<typename VisitorType>
+template<typename VisitorType, typename ReturnType>
 class VisitableBase
 {
 public:
   virtual ~VisitableBase() = default;
 
   virtual std::type_info const & typeInfo() const                      = 0;
-  virtual void                   accept( VisitorType & visitor ) const = 0;
+  virtual ReturnType             accept( VisitorType & visitor ) const = 0;
 
-}; // class VisitableBase<VisitorType>
+}; // class VisitableBase<VisitorType, ReturnType>
 
 // ----------------------------------------------------------------------------
 // Visitable
 // ----------------------------------------------------------------------------
 
-template<typename VisiteeType, typename VisitorType>
-class Visitable : public VisitableBase<VisitorType>
+template<typename VisiteeType, typename VisitorType, typename ReturnType>
+class Visitable : public VisitableBase<VisitorType, ReturnType>
 {
 public:
   Visitable( VisiteeType const & visitee );
 
   std::type_info const & typeInfo() const override;
-  void accept( VisitorType & visitor ) const override;
+  ReturnType             accept( VisitorType & visitor ) const override;
 
 private:
   std::reference_wrapper<VisiteeType const> mVisitee;
-}; // class Visitable<VisiteeType, VisitorType>
+}; // class Visitable<VisiteeType, VisitorType, ReturnType>
 
-template<typename VisitorType>
-using VisitableUPtr = std::unique_ptr<VisitableBase<VisitorType>>;
+
+template<typename VisitorType,
+         typename ReturnType = typename VisitorType::ReturnType>
+using VisitableUPtr = std::unique_ptr<VisitableBase<VisitorType, ReturnType>>;
+
+template<typename VisitorType, typename ReturnType, typename VisiteeType>
+VisitableUPtr<VisitorType, ReturnType>
+makeUniqueVisitable( VisiteeType const & visitee );
 
 template<typename VisitorType, typename VisiteeType>
-VisitableUPtr<VisitorType> makeUniqueVisitable( VisiteeType const & visitee );
+VisitableUPtr<VisitorType, typename VisitorType::ReturnType>
+makeUniqueVisitable( VisiteeType const & visitee );
 
-template<typename VisitorType>
-using VisitableSPtr = std::shared_ptr<VisitableBase<VisitorType>>;
+
+template<typename VisitorType,
+         typename ReturnType = typename VisitorType::ReturnType>
+using VisitableSPtr = std::shared_ptr<VisitableBase<VisitorType, ReturnType>>;
+
+template<typename VisitorType, typename ReturnType, typename VisiteeType>
+VisitableSPtr<VisitorType, ReturnType>
+makeSharedVisitable( VisiteeType const & visitee );
 
 template<typename VisitorType, typename VisiteeType>
-VisitableSPtr<VisitorType> makeSharedVisitable( VisiteeType const & visitee );
+VisitableSPtr<VisitorType, typename VisitorType::ReturnType>
+makeSharedVisitable( VisiteeType const & visitee );
 
 #include <visitor/Visitable.tpp>
 

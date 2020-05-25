@@ -1,22 +1,28 @@
 #ifndef StaticVisitor_hpp
 #define StaticVisitor_hpp
 
-template<typename... VisiteeTypes>
+template<typename ReturnType, typename... VisiteeTypes>
 struct StaticVisitor;
 
-template<typename FirstVisiteeType, typename... RestVisiteeTypes>
-struct StaticVisitor<FirstVisiteeType, RestVisiteeTypes...>
-    : public StaticVisitor<RestVisiteeTypes...>
+template<typename _ReturnType,
+         typename FirstVisiteeType,
+         typename... RestVisiteeTypes>
+struct StaticVisitor<_ReturnType, FirstVisiteeType, RestVisiteeTypes...>
+    : public StaticVisitor<_ReturnType, RestVisiteeTypes...>
 {
-  using StaticVisitor<RestVisiteeTypes...>::visit;
+  using ReturnType = _ReturnType;
 
-  virtual void visit( FirstVisiteeType const & visitee ) = 0;
-}; // class StaticVisitor<FirstVisiteeType, RestVisiteeTypes...>
+  using StaticVisitor<ReturnType, RestVisiteeTypes...>::visit;
 
-template<typename VisiteeType>
-struct StaticVisitor<VisiteeType>
+  virtual ReturnType visit( FirstVisiteeType const & visitee ) = 0;
+}; // class StaticVisitor<ReturnType, FirstVisiteeType, RestVisiteeTypes...>
+
+template<typename _ReturnType, typename VisiteeType>
+struct StaticVisitor<_ReturnType, VisiteeType>
 {
-  virtual void visit( VisiteeType const & visitee ) = 0;
-}; // class StaticVisitor<VisiteeType>
+  using ReturnType = _ReturnType;
+
+  virtual ReturnType visit( VisiteeType const & visitee ) = 0;
+}; // class StaticVisitor<ReturnType, VisiteeType>
 
 #endif // StaticVisitor_hpp

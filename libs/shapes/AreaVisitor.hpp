@@ -5,21 +5,19 @@
 
 #include <visitor/StaticVisitor.hpp>
 
-class AreaVisitor : public StaticVisitor<Rectangle, Circle>
+class AreaVisitor : public StaticVisitor<float, Rectangle, Circle>
 {
 public:
   virtual ~AreaVisitor() = default;
 
-  void visit( Rectangle const & r ) override
+  float visit( Rectangle const & r ) override
   {
-    totalArea += area( r );
+    return area( r );
   }
-  void visit( Circle const & c ) override
+  float visit( Circle const & c ) override
   {
-    totalArea += area( c );
+    return area( c );
   }
-
-  float totalArea = 0.0;
 };
 
 #endif // AreaVisitor_hpp
