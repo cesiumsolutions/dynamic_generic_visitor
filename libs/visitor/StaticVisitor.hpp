@@ -1,28 +1,43 @@
 #ifndef StaticVisitor_hpp
 #define StaticVisitor_hpp
 
-template<typename ReturnType, typename... VisiteeTypes>
+namespace detail {
+
+template<typename VisiteeType, typename SignatureType>
+struct InvokeVisit;
+
+template<typename VisiteeType, typename ReturnType, typename... ParameterTypes>
+struct InvokeVisit<VisiteeType, ReturnType( ParameterTypes... )>
+{
+  virtual ReturnType visit( VisiteeType const & visitee,
+                            ParameterTypes... parameters ) = 0;
+}; // struct InvokeVisit
+
+} // namespace detail
+
+template<typename SignatureType, typename... VisiteeTypes>
 struct StaticVisitor;
 
-template<typename _ReturnType,
+template<typename _SignatureType,
          typename FirstVisiteeType,
          typename... RestVisiteeTypes>
-struct StaticVisitor<_ReturnType, FirstVisiteeType, RestVisiteeTypes...>
-    : public StaticVisitor<_ReturnType, RestVisiteeTypes...>
+struct StaticVisitor<_SignatureType, FirstVisiteeType, RestVisiteeTypes...>
+    : public StaticVisitor<_SignatureType, RestVisiteeTypes...>
+    , public detail::InvokeVisit<FirstVisiteeType, _SignatureType>
 {
-  using ReturnType = _ReturnType;
+  using SignatureType = _SignatureType;
 
-  using StaticVisitor<ReturnType, RestVisiteeTypes...>::visit;
+  using StaticVisitor<SignatureType, RestVisiteeTypes...>::visit;
+  using detail::InvokeVisit<FirstVisiteeType, SignatureType>::visit;
+}; // class StaticVisitor<SignatureType, FirstVisiteeType, RestVisiteeTypes...>
 
-  virtual ReturnType visit( FirstVisiteeType const & visitee ) = 0;
-}; // class StaticVisitor<ReturnType, FirstVisiteeType, RestVisiteeTypes...>
-
-template<typename _ReturnType, typename VisiteeType>
-struct StaticVisitor<_ReturnType, VisiteeType>
+template<typename _SignatureType, typename VisiteeType>
+struct StaticVisitor<_SignatureType, VisiteeType>
+    : public detail::InvokeVisit<VisiteeType, _SignatureType>
 {
-  using ReturnType = _ReturnType;
+  using SignatureType = _SignatureType;
 
-  virtual ReturnType visit( VisiteeType const & visitee ) = 0;
-}; // class StaticVisitor<ReturnType, VisiteeType>
+  using detail::InvokeVisit<VisiteeType, SignatureType>::visit;
+}; // class StaticVisitor<SignatureType, VisiteeType>
 
 #endif // StaticVisitor_hpp

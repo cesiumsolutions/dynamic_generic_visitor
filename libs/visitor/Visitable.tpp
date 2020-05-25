@@ -5,67 +5,82 @@
 // Visitable
 // ----------------------------------------------------------------------------
 
-template<typename VisiteeType, typename VisitorType, typename ReturnType>
-Visitable<VisiteeType, VisitorType, ReturnType>::Visitable(
+template<typename VisiteeType,
+         typename VisitorType,
+         typename ReturnType,
+         typename... ParameterTypes>
+Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes... )>::Visitable(
     VisiteeType const & visitee )
-    : VisitableBase<VisitorType, ReturnType>()
+    : VisitableBase<VisitorType, ReturnType( ParameterTypes... )>()
     , mVisitee( std::cref( visitee ) )
 {
-} // Visitable<VisiteeType, VisitorType, ReturnType>::Visitable
+} // Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes...
+  // )>::Visitable
 
-template<typename VisiteeType, typename VisitorType, typename ReturnType>
+template<typename VisiteeType,
+         typename VisitorType,
+         typename ReturnType,
+         typename... ParameterTypes>
 std::type_info const &
-Visitable<VisiteeType, VisitorType, ReturnType>::typeInfo() const
+Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes... )>::typeInfo()
+    const
 {
   return typeid( VisiteeType );
-} // Visitable<VisiteeType, VisitorType, ReturnType>::typeInfo
+} // Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes...
+  // )>::typeInfo
 
-template<typename VisiteeType, typename VisitorType, typename ReturnType>
+template<typename VisiteeType,
+         typename VisitorType,
+         typename ReturnType,
+         typename... ParameterTypes>
 ReturnType
-Visitable<VisiteeType, VisitorType, ReturnType>::accept(
-    VisitorType & visitor ) const
+Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes... )>::accept(
+    VisitorType & visitor,
+    ParameterTypes... parameters ) const
 {
-  return visitor.visit( mVisitee.get() );
-} // Visitable<VisiteeType, VisitorType, ReturnType>::accept
+  return visitor.visit( mVisitee.get(),
+                        std::forward<ParameterTypes>( parameters )... );
+} // Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes...
+  // )>::accept
 
 // ----------------------------------------------------------------------------
 // Smart pointer initialization free functions
 // ----------------------------------------------------------------------------
 
-template<typename VisitorType, typename ReturnType, typename VisiteeType>
-VisitableUPtr<VisitorType, ReturnType>
+template<typename VisitorType, typename SignatureType, typename VisiteeType>
+VisitableUPtr<VisitorType, SignatureType>
 makeUniqueVisitable( VisiteeType const & visitee )
 {
-  return VisitableUPtr<VisitorType, ReturnType>(
-      new Visitable<VisiteeType, VisitorType, ReturnType>( visitee ) );
+  return VisitableUPtr<VisitorType, SignatureType>(
+      new Visitable<VisiteeType, VisitorType, SignatureType>( visitee ) );
 } // makeUniqueVisitable
 
 template<typename VisitorType, typename VisiteeType>
-VisitableUPtr<VisitorType, typename VisitorType::ReturnType>
+VisitableUPtr<VisitorType, typename VisitorType::SignatureType>
 makeUniqueVisitable( VisiteeType const & visitee )
 {
-  using ReturnType = VisitorType::ReturnType;
+  using SignatureType = typename VisitorType::SignatureType;
 
-  return VisitableUPtr<VisitorType, ReturnType>(
-      new Visitable<VisiteeType, VisitorType, ReturnType>( visitee ) );
+  return VisitableUPtr<VisitorType, SignatureType>(
+      new Visitable<VisiteeType, VisitorType, SignatureType>( visitee ) );
 } // makeUniqueVisitable
 
 
-template<typename VisitorType, typename ReturnType, typename VisiteeType>
-VisitableSPtr<VisitorType, ReturnType>
+template<typename VisitorType, typename SignatureType, typename VisiteeType>
+VisitableSPtr<VisitorType, SignatureType>
 makeSharedVisitable( VisiteeType const & visitee )
 {
-  return VisitableSPtr<VisitorType, ReturnType>(
+  return VisitableSPtr<VisitorType, SignatureType>(
       new Visitable<VisiteeType, VisitorType, ReturnType>( visitee ) );
 } // makeSharedVisitable
 
 template<typename VisitorType, typename VisiteeType>
-VisitableSPtr<VisitorType, typename VisitorType::ReturnType>
+VisitableSPtr<VisitorType, typename VisitorType::SignatureType>
 makeSharedVisitable( VisiteeType const & visitee )
 {
-  using ReturnType = VisitorType::ReturnType;
+  using SignatureType = typename VisitorType::SignatureType;
 
-  return VisitableSPtr<VisitorType, ReturnType>(
+  return VisitableSPtr<VisitorType, SignatureType>(
       new Visitable<VisiteeType, VisitorType, ReturnType>( visitee ) );
 } // makeSharedVisitable
 

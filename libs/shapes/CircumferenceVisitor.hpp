@@ -5,18 +5,19 @@
 
 #include <visitor/StaticVisitor.hpp>
 
-class CircumferenceVisitor : public StaticVisitor<float, Rectangle, Circle>
+class CircumferenceVisitor
+    : public StaticVisitor<float( float ), Rectangle, Circle>
 {
 public:
   virtual ~CircumferenceVisitor() = default;
 
-  float visit( Rectangle const & r ) override
+  float visit( Rectangle const & r, float scale ) override
   {
-    return circumference( r );
+    return scale * circumference( r );
   }
-  float visit( Circle const & c ) override
+  float visit( Circle const & c, float scale ) override
   {
-    return circumference( c );
+    return scale * circumference( c );
   }
 };
 
