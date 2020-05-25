@@ -1,8 +1,8 @@
 #ifndef ShapeVisitor_hpp
 #define ShapeVisitor_hpp
 
-class Rectangle;
-class Circle;
+struct Rectangle;
+struct Circle;
 
 class ShapeVisitor
 {
