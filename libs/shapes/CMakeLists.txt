@@ -8,7 +8,6 @@ set( HEADER_FILES
     CircumferenceVisitor.hpp
     Rectangle.hpp
     ShapeVisitor.hpp
-    VisitableShape.hpp
 )
 source_group(
     \\ FILES

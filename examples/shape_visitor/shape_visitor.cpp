@@ -1,7 +1,7 @@
 #include <shapes/AreaVisitor.hpp>
 #include <shapes/CircumferenceVisitor.hpp>
 
-#include <shapes/VisitableShape.hpp>
+#include <visitor/Visitable.hpp>
 
 #include <functional>
 #include <iostream>
@@ -11,13 +11,13 @@ struct NonShape
 {
 };
 
-using VisitableShapePtr    = std::unique_ptr<VisitableShapeBase>;
+using VisitableShapePtr    = VisitableUPtr<ShapeVisitor>;
 using VisitableShapePtrVec = std::vector<VisitableShapePtr>;
 
 int
 main( int, char ** )
 {
-  std::cout << "Running VisitableShape Example\n\n";
+  std::cout << "Running Generic Visitable Example\n\n";
 
   Rectangle rectangle { 2.0f, 3.0f };
   Circle    circle { 2.0f };
@@ -25,11 +25,11 @@ main( int, char ** )
 
   // Populate heterogeneous list of concrete Shape objects
   VisitableShapePtrVec shapes;
-  shapes.push_back( makeUniqueVisitableShape( rectangle ) );
-  shapes.push_back( makeUniqueVisitableShape( circle ) );
+  shapes.push_back( makeUniqueVisitable<ShapeVisitor>( rectangle ) );
+  shapes.push_back( makeUniqueVisitable<ShapeVisitor>( circle ) );
   // Note: Compile error - can't insert a type that ShapeVisitor doesn't
   // recognize
-  // shapes.push_back( makeUniqueVisitableShape( nonShape ) );
+  // shapes.push_back( makeUniqueVisitable<ShapeVisitor>( nonShape ) );
   (void)nonShape;
 
   // ==========================================================================
