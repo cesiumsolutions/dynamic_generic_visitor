@@ -4,6 +4,9 @@
 #include <visitor/DynamicVisitor.hpp>
 #include <visitor/Visitable.hpp>
 
+#include <boost/dll.hpp>
+#include <boost/function.hpp>
+
 #include <functional>
 #include <iostream>
 #include <vector>
@@ -18,11 +21,17 @@ using VisitableShapePtrVec = std::vector<VisitableShapePtr>;
 
 ShapeVisitor makeAreaVisitor();
 ShapeVisitor makeCircumferenceVisitor();
+void         loadPlugin( char const * const     pluginFilename,
+                         VisitableShapePtrVec & shapes,
+                         ShapeVisitor &         areaVisitor,
+                         ShapeVisitor &         circumferenceVisitor );
+
+boost::dll::shared_library sharedLib;
 
 int
-main( int, char ** )
+main( int argc, char ** argv )
 {
-  std::cout << "Running Generic DynamicVisitor with Signature Example\n\n";
+  std::cout << "Running Generic DynamicVisitor with Plugin Example\n\n";
 
   Rectangle rectangle { 2.0f, 3.0f };
   Circle    circle { 2.0f };
@@ -37,12 +46,18 @@ main( int, char ** )
   // handler is registered for it, it will result in a runtime error/warning.
   shapes.push_back( makeUniqueVisitable<ShapeVisitor>( nonShape ) );
 
+  ShapeVisitor areaVisitor          = makeAreaVisitor();
+  ShapeVisitor circumferenceVisitor = makeCircumferenceVisitor();
+
+  if ( argc >= 2 ) {
+    loadPlugin( argv[1], shapes, areaVisitor, circumferenceVisitor );
+  }
+
   // ==========================================================================
   std::cout << "Area Visitor:\n";
 
   // Visit the Shapes with the Area Visitor - checking valid accept result
-  ShapeVisitor areaVisitor = makeAreaVisitor();
-  float        totalArea   = 0.0f;
+  float totalArea = 0.0f;
   for ( auto const & shape : shapes ) {
     auto result = shape->accept( areaVisitor, scale );
     if ( result ) {
@@ -55,7 +70,9 @@ main( int, char ** )
                 << '\n';
     }
   }
-  float expectedArea = scale * area( rectangle ) + scale * area( circle );
+  float expectedArea =
+      scale * area( rectangle ) + scale * area( circle ) +
+      scale * ( ( 3.0f * 4.0f ) / 2.0f ); // right triangle 3,4,5
   std::cout << "  Visited Area: " << totalArea << '\n'
             << "  Expected Area: " << expectedArea << '\n';
 
@@ -63,8 +80,7 @@ main( int, char ** )
   std::cout << "\nCircumference Visitor:\n";
 
   // Visit the Shapes with the Circumference Visitor - checking valid result
-  ShapeVisitor circumferenceVisitor = makeCircumferenceVisitor();
-  float        totalCircumference   = 0.0f;
+  float totalCircumference = 0.0f;
   for ( auto const & shape : shapes ) {
     auto result = shape->accept( circumferenceVisitor, scale );
     if ( result ) {
@@ -78,7 +94,8 @@ main( int, char ** )
     }
   }
   float expectedCircumference =
-      scale * circumference( rectangle ) + scale * circumference( circle );
+      scale * circumference( rectangle ) + scale * circumference( circle ) +
+      scale * ( 3.0f + 4.0f + 5.0f ); // Triangle{3,4,5}
   std::cout << "  Visited Circumference: " << totalCircumference << '\n'
             << "  Expected Circumference: " << expectedCircumference << '\n';
 }
@@ -112,3 +129,43 @@ makeCircumferenceVisitor()
 
   return circumferenceVisitor;
 } // makeCircumferenceVisitor
+
+void
+loadPlugin( char const * const     pluginFilename,
+            VisitableShapePtrVec & shapes,
+            ShapeVisitor &         areaVisitor,
+            ShapeVisitor &         circumferenceVisitor )
+{
+  try {
+    std::cout << "Attempting to load Shape plugin from: " << pluginFilename
+              << '\n';
+    sharedLib.load( pluginFilename );
+
+    using ShapeSig   = void( VisitableShapePtrVec * );
+    using VisitorSig = void( ShapeVisitor * );
+
+    // Request plugin to fill the Shapes vector
+    boost::function<ShapeSig> fillShapes =
+        sharedLib.get<ShapeSig>( "fillShapes" );
+    if ( fillShapes ) {
+      fillShapes( &shapes );
+    }
+
+    // Request plugin to add handlers to the Area Visitor
+    boost::function<VisitorSig> fillAreaVisitor =
+        sharedLib.get<VisitorSig>( "fillAreaVisitor" );
+    if ( fillAreaVisitor ) {
+      fillAreaVisitor( &areaVisitor );
+    }
+
+    // Request plugin to add handlers to the Circumference Visitor
+    boost::function<VisitorSig> fillCircumferenceVisitor =
+        sharedLib.get<VisitorSig>( "fillCircumferenceVisitor" );
+    if ( fillCircumferenceVisitor ) {
+      fillCircumferenceVisitor( &circumferenceVisitor );
+    }
+  }
+  catch ( std::exception & e ) {
+    std::cerr << "EXCEPTION: " << e.what() << '\n';
+  }
+} // loadPlugin
