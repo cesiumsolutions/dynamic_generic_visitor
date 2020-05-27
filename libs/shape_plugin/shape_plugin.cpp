@@ -16,17 +16,14 @@ using ShapeVisitor         = DynamicVisitor<float( float )>;
 using VisitableShapePtr    = VisitableUPtr<ShapeVisitor>;
 using VisitableShapePtrVec = std::vector<VisitableShapePtr>;
 
-// Must make sure triangle is persistent as it is held by reference
-// in the Visitable
-static Triangle triangle { { 3.0f, 4.0f, 5.0f } };
-
 extern "C" {
 
 EXPORT void
 fillShapes( VisitableShapePtrVec * shapes )
 {
   if ( shapes ) {
-    shapes->push_back( makeUniqueVisitable<ShapeVisitor>( triangle ) );
+    shapes->push_back( makeUniqueVisitable<ShapeVisitor>(
+        Triangle { { 3.0f, 4.0f, 5.0f } } ) );
   }
 } // fillShapes
 

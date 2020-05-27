@@ -47,7 +47,7 @@ public:
                                  ParameterTypes... parameters ) const override;
 
 private:
-  std::reference_wrapper<VisiteeType const> mVisitee;
+  VisiteeType mVisitee;
 }; // class Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes... )>
 
 

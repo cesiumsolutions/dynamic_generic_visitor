@@ -12,7 +12,7 @@ template<typename VisiteeType,
 Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes... )>::Visitable(
     VisiteeType const & visitee )
     : VisitableBase<VisitorType, ReturnType( ParameterTypes... )>()
-    , mVisitee( std::cref( visitee ) )
+    , mVisitee( visitee )
 {
 } // Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes...
   // )>::Visitable
@@ -38,7 +38,7 @@ Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes... )>::accept(
     VisitorType & visitor,
     ParameterTypes... parameters ) const
 {
-  return visitor.visit( mVisitee.get(),
+  return visitor.visit( mVisitee,
                         std::forward<ParameterTypes>( parameters )... );
 } // Visitable<VisiteeType, VisitorType, ReturnType( ParameterTypes...
   // )>::accept
