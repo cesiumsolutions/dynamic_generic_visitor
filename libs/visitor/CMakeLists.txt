@@ -1,7 +1,10 @@
 set( TARGET visitor )
 
 set( HEADER_FILES
+    DynamicVisitor.hpp
+    DynamicVisitor.tpp
     StaticVisitor.hpp
+    TypeIndex.hpp
     Visitable.hpp
     Visitable.tpp
 )

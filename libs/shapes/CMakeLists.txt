@@ -2,10 +2,8 @@ set( TARGET shapes )
 
 set( HEADER_FILES
     Area.hpp
-    AreaVisitor.hpp
     Circle.hpp
     Circumference.hpp
-    CircumferenceVisitor.hpp
     Rectangle.hpp
 )
 source_group(
